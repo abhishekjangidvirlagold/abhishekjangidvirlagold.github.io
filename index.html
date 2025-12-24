@@ -12,7 +12,7 @@ body{
   background:#eef2f7;
 }
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 #loginPage{
   height:100vh;
   display:flex;
@@ -31,6 +31,7 @@ body{
   width:100%;
   padding:12px;
   margin:15px 0;
+  font-size:16px;
 }
 .login-box button{
   width:100%;
@@ -38,11 +39,20 @@ body{
   background:#0b4da2;
   color:#fff;
   border:none;
+  font-size:16px;
+  cursor:pointer;
 }
-.login-box p{color:red;text-align:center;display:none;}
+.login-box p{
+  color:red;
+  text-align:center;
+  display:none;
+}
 
-/* APP */
-#appPage{display:none;padding:25px;}
+/* ================= APP ================= */
+#appPage{
+  display:none;
+  padding:25px;
+}
 .card{
   max-width:1100px;
   margin:auto;
@@ -63,14 +73,16 @@ button.generate{
   color:#fff;
   border:none;
   font-size:16px;
+  cursor:pointer;
 }
 
 canvas{
   display:block;
   margin:25px auto;
-  max-width:420px;
+  max-width:420px;   /* preview only */
   width:100%;
   height:auto;
+  border-radius:10px;
   box-shadow:0 12px 30px rgba(0,0,0,.25);
 }
 
@@ -83,6 +95,7 @@ canvas{
   border-radius:8px;
   text-decoration:none;
   font-weight:bold;
+  text-align:center;
 }
 </style>
 </head>
@@ -93,7 +106,7 @@ canvas{
 <div id="loginPage">
   <div class="login-box">
     <h2>Secure Login</h2>
-    <input type="password" id="passwordInput" placeholder="Password">
+    <input type="password" id="passwordInput" placeholder="Enter password">
     <button onclick="checkPassword()">Login</button>
     <p id="loginError">Invalid password</p>
   </div>
@@ -102,6 +115,7 @@ canvas{
 <!-- APP -->
 <div id="appPage">
   <div class="card">
+
     <div class="controls">
       <div>
         <label>Date</label>
@@ -116,17 +130,23 @@ canvas{
 
     <canvas id="posterCanvas"></canvas>
     <a id="downloadLink">Download Poster</a>
+
   </div>
 </div>
 
 <script>
-/* PASSWORD */
+/* ================= PASSWORD ================= */
 const PASSWORD_HASH =
 "490cfee36bc2aaf4af9020e63d9eb75c38a8e4fa68ea309a7be94e1420315e5b";
 
 async function sha256(t){
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+  const b = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(t)
+  );
+  return [...new Uint8Array(b)]
+    .map(x=>x.toString(16).padStart(2,"0"))
+    .join("");
 }
 
 async function checkPassword(){
@@ -135,13 +155,16 @@ async function checkPassword(){
     loginPage.style.display="none";
     appPage.style.display="block";
     initPoster();
-  }else loginError.style.display="block";
+  }else{
+    loginError.style.display="block";
+  }
 }
 
-/* POSTER */
+/* ================= POSTER ================= */
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 const bgImage = new Image();
+
 let imgW = 0, imgH = 0;
 
 function initPoster(){
@@ -163,40 +186,46 @@ function drawPoster(){
   const date = currentDate.value;
   const rate = baseRate.value;
 
-  /* ===== FONT SIZE (GUARANTEED CHANGE) ===== */
-  const dateFont  = imgW * 0.028;   // clearly BIG
-  const priceFont = imgW * 0.032;   // bigger
+  /* ===== FONT SIZE (CLEARLY BIG & VISIBLE) ===== */
+  const dateFont  = imgW * 0.030;
+  const priceFont = imgW * 0.034;
 
-  /* ===== POSITION (BOTTOM BASED) ===== */
+  /* ===== POSITION (STABLE, NO JUMP) ===== */
   const dateX  = imgW * 0.145;
-  const dateY  = imgH * 0.32;       // niche laya
+  const dateY  = imgH * 0.31;
 
   const priceX = imgW * 0.72;
-  const priceY = imgH * 0.56;       // niche laya
+  const priceY = imgH * 0.56;
 
-  ctx.textAlign="center";
+  ctx.textAlign = "center";
 
-  ctx.fillStyle="#ffffff";
-  ctx.font=`bold ${dateFont}px Arial`;
+  /* DATE */
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `900 ${dateFont}px "Arial Black", Arial`;
   ctx.fillText(formatDate(date), dateX, dateY);
 
-  ctx.fillStyle="#20374D";
-  ctx.font=`bold ${priceFont}px Arial`;
+  /* PRICE */
+  ctx.fillStyle = "#20374D";
+  ctx.font = `900 ${priceFont}px "Arial Black", Arial`;
   ctx.fillText(`₹ ${rate}/-`, priceX, priceY);
 
-  downloadLink.href = canvas.toDataURL("image/jpeg",0.95);
-  downloadLink.download = `Virla Rate ${formatFileDate(date)}.jpg`;
+  /* ===== DOWNLOAD (FORCED NAME) ===== */
+  const fileName = `Virla Rate ${formatFileDate(date)}.jpg`;
+  downloadLink.setAttribute("href", canvas.toDataURL("image/jpeg",0.95));
+  downloadLink.setAttribute("download", fileName);
   downloadLink.style.display = "block";
 }
 
-function generatePoster(){ drawPoster(); }
+function generatePoster(){
+  drawPoster();
+}
 
 function formatDate(d){
-  const [y,m,dd]=d.split("-");
+  const [y,m,dd] = d.split("-");
   return `Date - ${dd}/${m}/${y}`;
 }
 function formatFileDate(d){
-  const [y,m,dd]=d.split("-");
+  const [y,m,dd] = d.split("-");
   return `${dd}-${m}-${y}`;
 }
 </script>
