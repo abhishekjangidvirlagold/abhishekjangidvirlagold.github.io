@@ -3,160 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virla Gold TMX 550D – Rate Poster Tool</title>
+<title>Virla Rate Poster</title>
 
 <style>
-:root{
-  --primary:#0d6efd;
-  --dark:#1f2937;
-  --bg:#f3f4f6;
-  --card:#ffffff;
-}
-
-*{box-sizing:border-box;}
-
 body{
   margin:0;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  background:linear-gradient(135deg,#eef2ff,#f8fafc);
-  color:#111827;
+  font-family: Arial, sans-serif;
+  background:#eef2f7;
 }
 
-/* ========== LOGIN PAGE ========== */
+/* LOGIN */
 #loginPage{
   height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
 }
-
 .login-box{
-  background:var(--card);
-  padding:32px;
+  background:#fff;
+  padding:30px;
   width:340px;
-  border-radius:14px;
-  box-shadow:0 20px 40px rgba(0,0,0,.15);
+  border-radius:12px;
+  box-shadow:0 20px 40px rgba(0,0,0,.2);
 }
-
-.login-box h2{
-  margin:0 0 20px;
-  text-align:center;
-  color:var(--dark);
-}
-
+.login-box h2{text-align:center;}
 .login-box input{
   width:100%;
   padding:12px;
-  font-size:16px;
-  border-radius:8px;
-  border:1px solid #d1d5db;
-  margin-bottom:15px;
+  margin:15px 0;
 }
-
 .login-box button{
   width:100%;
   padding:12px;
-  background:var(--primary);
+  background:#0b4da2;
   color:#fff;
   border:none;
-  border-radius:8px;
-  font-size:16px;
-  cursor:pointer;
 }
+.login-box p{color:red;text-align:center;display:none;}
 
-.login-box p{
-  text-align:center;
-  color:#dc2626;
-  display:none;
-  margin-top:10px;
-}
-
-/* ========== APP PAGE ========== */
-#appPage{
-  display:none;
-  padding:30px 15px;
-}
-
-.app-container{
+/* APP */
+#appPage{display:none;padding:25px;}
+.card{
   max-width:1100px;
   margin:auto;
-}
-
-.header{
-  text-align:center;
-  margin-bottom:25px;
-}
-
-.header h1{
-  margin:0;
-  font-size:26px;
-  color:var(--dark);
-}
-
-.card{
-  background:var(--card);
-  border-radius:14px;
+  background:#fff;
   padding:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.1);
+  border-radius:14px;
+  box-shadow:0 15px 35px rgba(0,0,0,.12);
 }
-
-/* Controls */
 .controls{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:15px;
-  margin-bottom:20px;
 }
-
-label{
-  font-weight:600;
-  font-size:14px;
-}
-
-input{
-  width:100%;
-  padding:10px;
-  font-size:15px;
-  border-radius:8px;
-  border:1px solid #d1d5db;
-}
-
 button.generate{
   grid-column:1/-1;
   padding:12px;
   background:#16a34a;
   color:#fff;
   border:none;
-  border-radius:8px;
   font-size:16px;
-  cursor:pointer;
-}
-
-/* Poster preview */
-.preview-box{
-  text-align:center;
 }
 
 canvas{
   display:block;
-  margin:20px auto;
-  max-width:420px;   /* PREVIEW SIZE */
+  margin:25px auto;
+  max-width:420px;
   width:100%;
   height:auto;
-  border-radius:10px;
-  box-shadow:0 10px 25px rgba(0,0,0,.2);
+  box-shadow:0 12px 30px rgba(0,0,0,.25);
 }
 
 #downloadLink{
   display:none;
-  margin-top:15px;
-  background:var(--primary);
+  margin:15px auto 0;
+  background:#0b4da2;
   color:#fff;
   padding:10px 18px;
   border-radius:8px;
   text-decoration:none;
-  font-weight:500;
-  display:inline-block;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -167,7 +93,7 @@ canvas{
 <div id="loginPage">
   <div class="login-box">
     <h2>Secure Login</h2>
-    <input type="password" id="passwordInput" placeholder="Enter password">
+    <input type="password" id="passwordInput" placeholder="Password">
     <button onclick="checkPassword()">Login</button>
     <p id="loginError">Invalid password</p>
   </div>
@@ -175,74 +101,57 @@ canvas{
 
 <!-- APP -->
 <div id="appPage">
-  <div class="app-container">
-
-    <div class="header">
-      <h1>Virla Gold TMX 550D – Rate Poster Generator</h1>
+  <div class="card">
+    <div class="controls">
+      <div>
+        <label>Date</label>
+        <input type="date" id="currentDate">
+      </div>
+      <div>
+        <label>Base Price</label>
+        <input type="text" id="baseRate" value="53500">
+      </div>
+      <button class="generate" onclick="generatePoster()">Generate Poster</button>
     </div>
 
-    <div class="card">
-      <div class="controls">
-        <div>
-          <label>Date</label>
-          <input type="date" id="currentDate">
-        </div>
-        <div>
-          <label>Base Price</label>
-          <input type="text" id="baseRate" value="53500">
-        </div>
-        <button class="generate" onclick="generatePoster()">Generate Poster</button>
-      </div>
-
-      <div class="preview-box">
-        <canvas id="posterCanvas"></canvas>
-        <a id="downloadLink" download>Download Poster</a>
-      </div>
-    </div>
-
+    <canvas id="posterCanvas"></canvas>
+    <a id="downloadLink">Download Poster</a>
   </div>
 </div>
 
 <script>
-/* ===== PASSWORD HASH ===== */
+/* PASSWORD */
 const PASSWORD_HASH =
 "490cfee36bc2aaf4af9020e63d9eb75c38a8e4fa68ea309a7be94e1420315e5b";
 
-async function sha256(text){
-  const buf = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(text)
-  );
-  return Array.from(new Uint8Array(buf))
-    .map(b=>b.toString(16).padStart(2,"0"))
-    .join("");
+async function sha256(t){
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
 async function checkPassword(){
-  const input=document.getElementById("passwordInput").value;
-  const hash=await sha256(input);
-  if(hash===PASSWORD_HASH){
+  const h = await sha256(passwordInput.value);
+  if(h === PASSWORD_HASH){
     loginPage.style.display="none";
     appPage.style.display="block";
     initPoster();
-  }else{
-    loginError.style.display="block";
-  }
+  }else loginError.style.display="block";
 }
 
-/* ===== POSTER LOGIC ===== */
-const canvas=document.getElementById("posterCanvas");
-const ctx=canvas.getContext("2d");
-const bgImage=new Image();
+/* POSTER */
+const canvas = document.getElementById("posterCanvas");
+const ctx = canvas.getContext("2d");
+const bgImage = new Image();
+let imgW = 0, imgH = 0;
 
 function initPoster(){
-  document.getElementById("currentDate").value =
-    new Date().toISOString().split("T")[0];
-
-  bgImage.src="Virla_Blank_Poster.jpg";
-  bgImage.onload=()=>{
-    canvas.width=bgImage.width;
-    canvas.height=bgImage.height;
+  currentDate.value = new Date().toISOString().split("T")[0];
+  bgImage.src = "Virla_Blank_Poster.jpg";
+  bgImage.onload = ()=>{
+    imgW = bgImage.width;
+    imgH = bgImage.height;
+    canvas.width = imgW;
+    canvas.height = imgH;
     drawPoster();
   };
 }
@@ -251,27 +160,33 @@ function drawPoster(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(bgImage,0,0);
 
-  const date=currentDate.value;
-  const rate=baseRate.value;
+  const date = currentDate.value;
+  const rate = baseRate.value;
 
-  /* ===== FIXED POSITIONS (STABLE) ===== */
-  const dateX=canvas.width*0.143;
-  const dateY=canvas.height*0.285;
+  /* ===== FONT SIZE (GUARANTEED CHANGE) ===== */
+  const dateFont  = imgW * 0.028;   // clearly BIG
+  const priceFont = imgW * 0.032;   // bigger
 
-  const priceX=canvas.width*0.722;
-  const priceY=canvas.height*0.525;
+  /* ===== POSITION (BOTTOM BASED) ===== */
+  const dateX  = imgW * 0.145;
+  const dateY  = imgH * 0.32;       // niche laya
+
+  const priceX = imgW * 0.72;
+  const priceY = imgH * 0.56;       // niche laya
+
+  ctx.textAlign="center";
 
   ctx.fillStyle="#ffffff";
-  ctx.font=`${canvas.width*0.018}px Arial`;
-  ctx.textAlign="center";
-  ctx.fillText(formatDate(date),dateX,dateY);
+  ctx.font=`bold ${dateFont}px Arial`;
+  ctx.fillText(formatDate(date), dateX, dateY);
 
   ctx.fillStyle="#20374D";
-  ctx.font=`bold ${canvas.width*0.02}px Arial`;
-  ctx.fillText(`₹ ${rate}/-`,priceX,priceY);
+  ctx.font=`bold ${priceFont}px Arial`;
+  ctx.fillText(`₹ ${rate}/-`, priceX, priceY);
 
-  downloadLink.href=canvas.toDataURL("image/jpeg",0.9);
-  downloadLink.style.display="inline-block";
+  downloadLink.href = canvas.toDataURL("image/jpeg",0.95);
+  downloadLink.download = `Virla Rate ${formatFileDate(date)}.jpg`;
+  downloadLink.style.display = "block";
 }
 
 function generatePoster(){ drawPoster(); }
@@ -279,6 +194,10 @@ function generatePoster(){ drawPoster(); }
 function formatDate(d){
   const [y,m,dd]=d.split("-");
   return `Date - ${dd}/${m}/${y}`;
+}
+function formatFileDate(d){
+  const [y,m,dd]=d.split("-");
+  return `${dd}-${m}-${y}`;
 }
 </script>
 
