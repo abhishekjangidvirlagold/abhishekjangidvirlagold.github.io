@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Virla Rate Poster</title>
 
 <style>
@@ -11,8 +10,6 @@ body{
   font-family: Arial, sans-serif;
   background:#eef2f7;
 }
-
-/* ================= LOGIN ================= */
 #loginPage{
   height:100vh;
   display:flex;
@@ -22,16 +19,14 @@ body{
 .login-box{
   background:#fff;
   padding:30px;
-  width:340px;
-  border-radius:12px;
-  box-shadow:0 20px 40px rgba(0,0,0,.2);
+  width:320px;
+  border-radius:10px;
+  box-shadow:0 15px 30px rgba(0,0,0,.2);
 }
-.login-box h2{text-align:center;}
 .login-box input{
   width:100%;
   padding:12px;
-  margin:15px 0;
-  font-size:16px;
+  margin:12px 0;
 }
 .login-box button{
   width:100%;
@@ -39,204 +34,139 @@ body{
   background:#0b4da2;
   color:#fff;
   border:none;
-  font-size:16px;
-  cursor:pointer;
 }
-.login-box p{
-  color:red;
-  text-align:center;
-  display:none;
-}
+.login-box p{color:red;text-align:center;display:none;}
 
-/* ================= APP ================= */
-#appPage{
-  display:none;
-  padding:25px;
-}
+#appPage{display:none;padding:20px;}
 .card{
-  max-width:1100px;
+  max-width:1000px;
   margin:auto;
   background:#fff;
   padding:20px;
-  border-radius:14px;
-  box-shadow:0 15px 35px rgba(0,0,0,.12);
+  border-radius:12px;
 }
-.controls{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-}
-button.generate{
-  grid-column:1/-1;
-  padding:12px;
-  background:#16a34a;
-  color:#fff;
-  border:none;
-  font-size:16px;
-  cursor:pointer;
-}
-
 canvas{
   display:block;
-  margin:25px auto;
-  max-width:420px;   /* preview only */
+  margin:20px auto;
+  max-width:420px;
   width:100%;
-  height:auto;
-  border-radius:10px;
-  box-shadow:0 12px 30px rgba(0,0,0,.25);
 }
-
 #downloadLink{
   display:none;
-  margin:15px auto 0;
+  margin:10px auto;
+  width:max-content;
   background:#0b4da2;
   color:#fff;
   padding:10px 18px;
-  border-radius:8px;
+  border-radius:6px;
   text-decoration:none;
   font-weight:bold;
-  text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginPage">
   <div class="login-box">
-    <h2>Secure Login</h2>
-    <input type="password" id="passwordInput" placeholder="Enter password">
+    <h3 style="text-align:center">Secure Login</h3>
+    <input type="password" id="passwordInput" placeholder="Password">
     <button onclick="checkPassword()">Login</button>
     <p id="loginError">Invalid password</p>
   </div>
 </div>
 
-<!-- APP -->
 <div id="appPage">
   <div class="card">
+    <label>Date</label>
+    <input type="date" id="currentDate"><br><br>
 
-    <div class="controls">
-      <div>
-        <label>Date</label>
-        <input type="date" id="currentDate">
-      </div>
-      <div>
-        <label>Base Price</label>
-        <input type="text" id="baseRate" value="53500">
-      </div>
-      <button class="generate" onclick="generatePoster()">Generate Poster</button>
-    </div>
+    <label>Base Price</label>
+    <input type="text" id="baseRate" value="53500"><br><br>
+
+    <button onclick="generatePoster()">Generate Poster</button>
 
     <canvas id="posterCanvas"></canvas>
     <a id="downloadLink">Download Poster</a>
-
   </div>
 </div>
 
 <script>
-/* ================= PASSWORD ================= */
+/* PASSWORD */
 const PASSWORD_HASH =
 "490cfee36bc2aaf4af9020e63d9eb75c38a8e4fa68ea309a7be94e1420315e5b";
 
 async function sha256(t){
-  const b = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(t)
-  );
-  return [...new Uint8Array(b)]
-    .map(x=>x.toString(16).padStart(2,"0"))
-    .join("");
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
 async function checkPassword(){
   const h = await sha256(passwordInput.value);
-  if(h === PASSWORD_HASH){
+  if(h===PASSWORD_HASH){
     loginPage.style.display="none";
     appPage.style.display="block";
     initPoster();
-  }else{
-    loginError.style.display="block";
-  }
+  }else loginError.style.display="block";
 }
 
-/* ================= POSTER ================= */
-const canvas = document.getElementById("posterCanvas");
-const ctx = canvas.getContext("2d");
-const bgImage = new Image();
-
-let imgW = 0, imgH = 0;
+/* POSTER */
+const canvas=document.getElementById("posterCanvas");
+const ctx=canvas.getContext("2d");
+const img=new Image();
 
 function initPoster(){
-  currentDate.value = new Date().toISOString().split("T")[0];
-  bgImage.src = "Virla_Blank_Poster.jpg";
-  bgImage.onload = ()=>{
-    imgW = bgImage.width;
-    imgH = bgImage.height;
-    canvas.width = imgW;
-    canvas.height = imgH;
+  currentDate.value=new Date().toISOString().split("T")[0];
+  img.src="Virla_Blank_Poster.jpg";
+  img.onload=()=>{
+    canvas.width=img.width;
+    canvas.height=img.height;
     drawPoster();
   };
 }
 
 function drawPoster(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(bgImage,0,0);
+  ctx.drawImage(img,0,0);
 
-  const date = currentDate.value;
-  const rate = baseRate.value;
+  const date=currentDate.value;
+  const rate=baseRate.value;
 
-  /* ===== FONT SIZE (CLEARLY BIG & VISIBLE) ===== */
-  const dateFont  = imgW * 0.015;
-  const priceFont = imgW * 0.025;
+  /* ===== EXACT COORDINATES (LOCKED) ===== */
+  const dateX = 420;   // LEFT strip ke andar
+  const dateY = 520;   // BLUE strip ke center
 
-  /* ===== POSITION (STABLE, NO JUMP) ===== */
-  const dateX  = imgW * 0.145;
-  const dateY  = imgH * 0.29;
+  const priceX = 2350; // ₹ column center
+  const priceY = 980;  // 12mm row
 
-  const priceX = imgW * 0.72;
-  const priceY = imgH * 0.53;
+  /* FONT MATCH */
+  ctx.textAlign="center";
 
-  ctx.textAlign = "center";
+  ctx.fillStyle="#ffffff";
+  ctx.font="bold 42px Arial";
+  ctx.fillText(`Date - ${formatDate(date)}`,dateX,dateY);
 
-  /* DATE */
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `900 ${dateFont}px "Arial Black", Arial`;
-  ctx.fillText(formatDate(date), dateX, dateY);
+  ctx.fillStyle="#20374D";
+  ctx.font="bold 48px Arial";
+  ctx.fillText(`₹ ${rate}/-`,priceX,priceY);
 
-  /* PRICE */
-  ctx.fillStyle = "#20374D";
-  ctx.font = `900 ${priceFont}px "Arial Black", Arial`;
-  ctx.fillText(`₹ ${rate}/-`, priceX, priceY);
-
-  /* ===== DOWNLOAD (FORCED NAME) ===== */
-  const fileName = `Virla Rate ${formatFileDate(date)}.jpg`;
-  downloadLink.setAttribute("href", canvas.toDataURL("image/jpeg",0.95));
-  downloadLink.setAttribute("download", fileName);
-  downloadLink.style.display = "block";
+  /* DOWNLOAD */
+  const fname=`Virla Rate ${formatFileDate(date)}.jpg`;
+  downloadLink.href=canvas.toDataURL("image/jpeg",0.95);
+  downloadLink.download=fname;
+  downloadLink.style.display="block";
 }
 
-function generatePoster(){
-  drawPoster();
-}
+function generatePoster(){ drawPoster(); }
 
 function formatDate(d){
-  const [y,m,dd] = d.split("-");
-  return `Date - ${dd}/${m}/${y}`;
+  const [y,m,dd]=d.split("-");
+  return `${dd}/${m}/${y}`;
 }
 function formatFileDate(d){
-  const [y,m,dd] = d.split("-");
+  const [y,m,dd]=d.split("-");
   return `${dd}-${m}-${y}`;
 }
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
